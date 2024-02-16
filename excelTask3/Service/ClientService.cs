@@ -5,20 +5,21 @@ namespace excelTask3.Service
 {
     public class ClientService : ModelService
     {
+        public List<Client> ClientsList { get { return AllClients; } }
         public ClientService(IExcelProcess excelProcess) : base(excelProcess)
         {
         }
         public Client GetClientByName(string name)
         {
-            var clients = AllClients;
-            var result = clients.Single(x => x.FullName == name);
+            var clients = ClientsList;
+            var result = clients.SingleOrDefault(x => x.FullName == name);
             return result;
         }
 
         public Client GetClientById(int id)
         {
-            var clients = AllClients;
-            var result = clients.Single(x => x.Id == id);
+            var clients = ClientsList;
+            var result = clients.SingleOrDefault(x => x.Id == id);
             return result;
         }
     }

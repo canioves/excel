@@ -5,21 +5,22 @@ namespace excelTask3.Service
 {
     public class RequestService : ModelService
     {
+        public List<Request> RequestsList { get { return AllRequests; } }
         public RequestService(IExcelProcess excelProcess) : base(excelProcess)
         {
         }
 
         public Request GetRequestByNumber(int number)
         {
-            var requests = AllRequests;
-            var result = requests.Single(x => x.RequestNumber == number);
+            var requests = RequestsList;
+            var result = requests.SingleOrDefault(x => x.RequestNumber == number);
             return result;
         }
 
         public Request GetRequestById(int id)
         {
-            var requests = AllRequests;
-            var result = requests.Single(x => x.Id == id);
+            var requests = RequestsList;
+            var result = requests.SingleOrDefault(x => x.Id == id);
             return result;
         }
     }

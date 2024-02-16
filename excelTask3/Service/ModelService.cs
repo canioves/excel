@@ -6,9 +6,9 @@ namespace excelTask3.Service
     public class ModelService
     {
         protected readonly IExcelProcess _excelProcess;
-        public List<Product> AllProducts;
-        public List<Client> AllClients;
-        public List<Request> AllRequests;
+        protected List<Product> AllProducts;
+        protected List<Client> AllClients;
+        protected List<Request> AllRequests;
         public ModelService(IExcelProcess excelProcess)
         {
             _excelProcess = excelProcess;
@@ -22,7 +22,7 @@ namespace excelTask3.Service
             var table = _excelProcess.GetProductsTable();
             var rowsCount = table.RowCount();
             var products = new List<Product>();
-            for (int i = 2; i < rowsCount; i++)
+            for (int i = 2; i <= rowsCount; i++)
             {
                 var product = new Product
                 {
@@ -41,11 +41,11 @@ namespace excelTask3.Service
             var table = _excelProcess.GetClientsTable();
             var rowsCount = table.RowCount();
             var clients = new List<Client>();
-            for (int i = 2; i < rowsCount; i++)
+            for (int i = 2; i <= rowsCount; i++)
             {
                 var client = new Client
                 {
-                    Id = Convert.ToInt32(table.Field("Код товара").DataCells.Single(x => x.Address.RowNumber == i).Value.ToString()),
+                    Id = Convert.ToInt32(table.Field("Код клиента").DataCells.Single(x => x.Address.RowNumber == i).Value.ToString()),
                     Organization = table.Field("Наименование организации").DataCells.Single(x => x.Address.RowNumber == i).Value.ToString(),
                     Address = table.Field("Адрес").DataCells.Single(x => x.Address.RowNumber == i).Value.ToString(),
                     FullName = table.Field("Контактное лицо (ФИО)").DataCells.Single(x => x.Address.RowNumber == i).Value.ToString()
@@ -57,14 +57,14 @@ namespace excelTask3.Service
 
         private List<Request> GetAllRequsets()
         {
-            var table = _excelProcess.GetClientsTable();
+            var table = _excelProcess.GetRequestsTable();
             var rowsCount = table.RowCount();
             var requests = new List<Request>();
-            for (int i = 2; i < rowsCount; i++)
+            for (int i = 2; i <= rowsCount; i++)
             {
                 var request = new Request
                 {
-                    Id = Convert.ToInt32(table.Field("Код товара").DataCells.Single(x => x.Address.RowNumber == i).Value.ToString()),
+                    Id = Convert.ToInt32(table.Field("Код заявки").DataCells.Single(x => x.Address.RowNumber == i).Value.ToString()),
                     ProductId = Convert.ToInt32(table.Field("Код товара").DataCells.Single(x => x.Address.RowNumber == i).Value.ToString()),
                     ClientId = Convert.ToInt32(table.Field("Код клиента").DataCells.Single(x => x.Address.RowNumber == i).Value.ToString()),
                     RequestNumber = Convert.ToInt32(table.Field("Номер заявки").DataCells.Single(x => x.Address.RowNumber == i).Value.ToString()),
