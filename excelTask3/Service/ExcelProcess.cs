@@ -1,11 +1,13 @@
+using System.Data;
 using ClosedXML.Excel;
-using DocumentFormat.OpenXml.Presentation;
 using excelTask3.Interfaces;
+using Models;
 
 namespace excelTask3.Service
 {
     public class ExcelProcess : IExcelProcess
     {
+        private IXLWorkbook Workbook;
         private IXLWorksheet Products;
         private IXLWorksheet Clients;
         private IXLWorksheet Requests;
@@ -16,8 +18,8 @@ namespace excelTask3.Service
             string fullPath = dirPath.Replace("bin\\Debug\\net8.0", "") + path;
             try
             {
-                XLWorkbook workbook = new XLWorkbook(fullPath);
-                IXLWorksheets worksheets = workbook.Worksheets;
+                Workbook = new XLWorkbook(fullPath);
+                IXLWorksheets worksheets = Workbook.Worksheets;
                 Products = worksheets.Worksheet(1);
                 Clients = worksheets.Worksheet(2);
                 Requests = worksheets.Worksheet(3);
@@ -43,5 +45,22 @@ namespace excelTask3.Service
         public IXLTable GetProductsTable() => CreateTables(Products);
         public IXLTable GetClientsTable() => CreateTables(Clients);
         public IXLTable GetRequestsTable() => CreateTables(Requests);
+
+        public void UpdateClientsTable(IXLTable clientsTable)
+        {
+            var firstCell = Clients.FirstCellUsed().CellBelow().Address;
+            var lastCell = Clients.LastCellUsed().Address;
+            var firstTableCell = clientsTable.FirstCellUsed().CellBelow().Address;
+            var lastTableCell = clientsTable.LastCellUsed().Address;
+
+            for (int i = firstCell.RowNumber; i < lastCell.RowNumber; i++)
+            {
+                int row = i - firstTableCell.RowNumber;
+                for (int j = firstCell.ColumnNumber; j < lastCell.ColumnNumber; j++)
+                {
+                }
+            }
+            Workbook.Save();
+        }
     }
 }

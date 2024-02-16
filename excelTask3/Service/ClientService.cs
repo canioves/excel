@@ -5,14 +5,22 @@ namespace excelTask3.Service
 {
     public class ClientService : ModelService
     {
-        public List<Client> ClientsList { get { return AllClients; } }
+        public List<Client> ClientsList
+        {
+            get => AllClients;
+            set
+            {
+                ClientsList = value;
+                AllClients = ClientsList;
+            }
+        }
         public ClientService(IExcelProcess excelProcess) : base(excelProcess)
         {
         }
-        public Client GetClientByName(string name)
+        public Client GetClientByOrganization(string name)
         {
             var clients = ClientsList;
-            var result = clients.SingleOrDefault(x => x.FullName == name);
+            var result = clients.SingleOrDefault(x => x.Organization == name);
             return result;
         }
 
@@ -21,6 +29,14 @@ namespace excelTask3.Service
             var clients = ClientsList;
             var result = clients.SingleOrDefault(x => x.Id == id);
             return result;
+        }
+
+        public void UpdateClientInfo(Client updatedClient)
+        {
+            var clientsIds = ClientsList.Select(x => x.Id).ToList();
+            int idx = clientsIds.IndexOf(updatedClient.Id);
+            ClientsList[idx] = updatedClient;
+            UpdateAllClients();
         }
     }
 }

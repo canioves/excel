@@ -7,5 +7,6 @@ namespace excelTask3.Interfaces
         public IXLTable GetProductsTable();
         public IXLTable GetClientsTable();
         public IXLTable GetRequestsTable();
+        public void UpdateClientsTable(IXLTable clientTable);
     }
 }

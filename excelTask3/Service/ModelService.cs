@@ -1,3 +1,4 @@
+using ClosedXML.Excel;
 using excelTask3.Interfaces;
 using Models;
 
@@ -74,6 +75,34 @@ namespace excelTask3.Service
                 requests.Add(request);
             }
             return requests;
+        }
+
+        public void UpdateAllClients()
+        {
+            var table = _excelProcess.GetClientsTable();
+            var rowsCount = table.RowCount();
+            for (int i = 2; i <= rowsCount; i++)
+            {
+                foreach (var fieldName in table.Fields)
+                {
+                    switch (fieldName.Name)
+                    {
+                        case "Код клиента":
+                            table.Field(fieldName.Name).DataCells.Single(x => x.Address.RowNumber == i).Value = AllClients[i - 2].Id;
+                            break;
+                        case "Наименование организации":
+                            table.Field(fieldName.Name).DataCells.Single(x => x.Address.RowNumber == i).Value = AllClients[i - 2].Organization;
+                            break;
+                        case "Адрес":
+                            table.Field(fieldName.Name).DataCells.Single(x => x.Address.RowNumber == i).Value = AllClients[i - 2].Address;
+                            break;
+                        case "Контактное лицо (ФИО)":
+                            table.Field(fieldName.Name).DataCells.Single(x => x.Address.RowNumber == i).Value = AllClients[i - 2].FullName;
+                            break;
+                    }
+                }
+            }
+            _excelProcess.UpdateClientsTable(table);
         }
     }
 }

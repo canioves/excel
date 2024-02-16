@@ -38,7 +38,7 @@ while (appRunning)
             Console.WriteLine("Здесь будет золотой клиент");
             break;
         case "3":
-            Console.WriteLine("Здесь будет измененная информация о клиенте");
+            app.ChangeOrgContactName("ООО Тест", "Измененный Тест Тестович");
             break;
         case "q":
             Console.WriteLine("Выход...");
@@ -66,6 +66,7 @@ public class App
         requestService = new RequestService(excelProcess);
         repeatInit = excelProcess.repeatInit;
     }
+
     public bool GetAllProductInfo(string productName)
     {
         bool startOver = false;
@@ -114,6 +115,14 @@ public class App
         }
         return startOver;
     }
+
+    public bool ChangeOrgContactName(string organization, string newFullName)
+    {
+        var client = clientService.GetClientByOrganization(organization);
+        client.FullName = newFullName;
+        clientService.UpdateClientInfo(client);
+        return true;
+    }
     private void PrintAllProductInfo(string organization, int amount, double price, string date)
     {
         Console.WriteLine($"- Организация: {organization}");
@@ -121,20 +130,12 @@ public class App
         Console.WriteLine($"- Итоговая цена: {price}");
         Console.WriteLine($"- Дата заказа: {date}");
     }
+
     public void PrintMenu()
     {
         Console.WriteLine("1. Получить информацию о клиентах по названию товара.");
         Console.WriteLine("2. Определить \"Золотого\" клиента.");
         Console.WriteLine("3. Изменить ФИО контактного лица организации.\n");
         Console.WriteLine("Нажмите q, чтобы выйти...");
-    }
-    public void PrintProduct(string name)
-    {
-
-        Product product = productService.GetProductByName(name);
-        Console.WriteLine($"Айди: {product.Id}");
-        Console.WriteLine($"Название: {product.Name}");
-        Console.WriteLine($"Единица измерения: {product.UnitName}");
-        Console.WriteLine($"Цена: {product.Price}\n");
     }
 }
