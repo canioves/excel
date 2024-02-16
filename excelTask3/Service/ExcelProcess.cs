@@ -1,4 +1,5 @@
 using ClosedXML.Excel;
+using DocumentFormat.OpenXml.Presentation;
 using excelTask3.Interfaces;
 
 namespace excelTask3.Service
@@ -20,19 +21,27 @@ namespace excelTask3.Service
                 Products = worksheets.Worksheet(1);
                 Clients = worksheets.Worksheet(2);
                 Requests = worksheets.Worksheet(3);
+                
 
-                Console.WriteLine($"Успешно открыт файл по пути: {fullPath}");
+                Console.WriteLine($"Успешно открыт файл по пути: {fullPath}\n");
                 repeatInit = false;
             }
             catch
             {
-                Console.WriteLine($"Ошибка открытия файла по пути: {fullPath}. Попробуйте еще раз.");
+                Console.WriteLine($"Ошибка открытия файла по пути: {fullPath}. Попробуйте еще раз.\n");
                 repeatInit = true;
             }
         }
-
-        public IXLTable GetProductsTable() => Products.RangeUsed().CreateTable();
-        public IXLTable GetClientsTable() => Clients.RangeUsed().CreateTable();
-        public IXLTable GetRequestsTable() => Requests.RangeUsed().CreateTable();
+        private IXLTable CreateTables(IXLWorksheet sheet)
+        {
+            var firstCell = sheet.FirstCellUsed();
+            var lastCell = sheet.LastCellUsed();
+            var range = sheet.Range(firstCell.Address, lastCell.Address);
+            return range.AsTable();
+        }
+        
+        public IXLTable GetProductsTable() => CreateTables(Products);
+        public IXLTable GetClientsTable() => CreateTables(Clients);
+        public IXLTable GetRequestsTable() => CreateTables(Requests);
     }
 }

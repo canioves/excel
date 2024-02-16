@@ -1,5 +1,8 @@
-﻿using excelTask3.Service;
+﻿using System.Text;
+using excelTask3.Service;
 using Models;
+
+Console.InputEncoding = Encoding.UTF8;
 
 App app = new App();
 
@@ -8,23 +11,38 @@ Console.WriteLine("Введите путь до Excel файла: ");
 
 while (app.repeatInit)
 {
-    // string path = @"Data\dataTable.xlsx";
-    string path = Console.ReadLine();
+    string path = @"Data\dataTable.xlsx";
+    // string path = Console.ReadLine();
     app.Init(path);
 }
 
 while (appRunning)
 {
+    // Console.Clear();
     app.PrintMenu();
     string key = Console.ReadLine();
+    
     switch (key)
     {
         case "1":
-            Console.Clear();
+            Console.Write("Введите название товара: ");
             string productName = Console.ReadLine();
-            // app.PrintProductId(productName);
+            app.PrintProduct(productName);
+            break;
+        case "2":
+            Console.WriteLine("Здесь будет золотой клиент");
+            break;
+        case "3":
+            Console.WriteLine("Здесь будет измененная информация о клиенте");
+            break;
+        case "q":
+            Console.WriteLine("Выход...");
+            appRunning = false;
             break;
     }
+    if (!appRunning) break;
+    Console.WriteLine("Чтобы продолжить, нажмите любую клавишу...");
+    Console.ReadLine();
 }
 
 // app.PrintAllProducts();
@@ -49,23 +67,12 @@ public class App
     {
         Console.WriteLine("1. Получить информацию о клиентах по названию товара.");
         Console.WriteLine("2. Определить \"Золотого\" клиента.");
-        Console.WriteLine("3. Изменить ФИО контактного лица организации.");
-    }
-    public void PrintAllProducts()
-    {
-        Console.WriteLine("Все продукты:");
-        var lst = productService.GetAllProducts();
-        foreach (var product in lst)
-        {
-            Console.WriteLine($"Айди: {product.Id}");
-            Console.WriteLine($"Название: {product.Name}");
-            Console.WriteLine($"Единица измерения: {product.UnitName}");
-            Console.WriteLine($"Цена: {product.Price}\n");
-        }
+        Console.WriteLine("3. Изменить ФИО контактного лица организации.\n");
+        Console.WriteLine("Нажмите q, чтобы выйти...");
     }
     public void PrintProduct(string name)
     {
-        Console.WriteLine("Введите название товара: ");
+        
         Product product = productService.GetProductByName(name);
         Console.WriteLine($"Айди: {product.Id}");
         Console.WriteLine($"Название: {product.Name}");
