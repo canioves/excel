@@ -50,14 +50,12 @@ namespace excelTask3.Service
         {
             var firstCell = Clients.FirstCellUsed().CellBelow().Address;
             var lastCell = Clients.LastCellUsed().Address;
-            var firstTableCell = clientsTable.FirstCellUsed().CellBelow().Address;
-            var lastTableCell = clientsTable.LastCellUsed().Address;
 
             for (int i = firstCell.RowNumber; i < lastCell.RowNumber; i++)
             {
-                int row = i - firstTableCell.RowNumber;
                 for (int j = firstCell.ColumnNumber; j < lastCell.ColumnNumber; j++)
                 {
+                    Clients.Cell(i, j).Value = clientsTable.Cell(i, j).Value;
                 }
             }
             Workbook.Save();
