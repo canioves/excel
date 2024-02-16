@@ -7,7 +7,6 @@ namespace excelTask3.Service
     {
         public ProductService(IExcelProcess excelProcess) : base(excelProcess)
         {
-
         }
         public List<Product> GetAllProducts()
         {
