@@ -1,7 +1,5 @@
-using System.Data;
 using ClosedXML.Excel;
 using excelTask3.Interfaces;
-using Models;
 
 namespace excelTask3.Service
 {
@@ -15,7 +13,7 @@ namespace excelTask3.Service
         public ExcelProcess(string path)
         {
             string dirPath = Directory.GetCurrentDirectory();
-            string fullPath = dirPath.Replace("bin\\Debug\\net8.0", "") + path;
+            string fullPath = dirPath.Replace(@"bin\Debug\net8.0", "") + path;
             try
             {
                 Workbook = new XLWorkbook(fullPath);
@@ -25,12 +23,12 @@ namespace excelTask3.Service
                 Requests = worksheets.Worksheet(3);
                 
 
-                Console.WriteLine($"Успешно открыт файл по пути: {fullPath}\n");
+                Console.WriteLine($"Успешно открыт файл по пути: {fullPath}...");
                 repeatInit = false;
             }
             catch
             {
-                Console.WriteLine($"Ошибка открытия файла по пути: {fullPath}. Попробуйте еще раз.\n");
+                Console.WriteLine($"Ошибка открытия файла по пути: {fullPath}. Попробуйте еще раз...\n");
                 repeatInit = true;
             }
         }

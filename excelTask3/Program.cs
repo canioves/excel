@@ -7,25 +7,34 @@ Console.InputEncoding = Encoding.UTF8;
 App app = new App();
 
 bool appRunning = true;
-Console.WriteLine("Введите путь до Excel файла: ");
+Console.WriteLine("Введите путь до Excel файла: \n");
 
 while (app.repeatInit)
 {
-    string path = @"Data\dataTable.xlsx";
-    // string path = Console.ReadLine();
-    app.Init(path);
+    // string path = @"Data\dataTable.xlsx";
+    Console.Write("Путь => ");
+    string path = Console.ReadLine();
+    Console.Clear();
+    app.InitExcel(path);
 }
+
+app.InitSheets();
+
+Thread.Sleep(2000);
 
 while (appRunning)
 {
-    // Console.Clear();
+    Console.Clear();
     app.PrintMenu();
-    string key = Console.ReadLine();
+    var key = Console.ReadKey().Key;
+    // var key = Console.ReadLine();
     bool keepAlive = true;
+    Console.Clear();
 
     switch (key)
     {
-        case "1":
+        case ConsoleKey.D1:
+        // case "1":
             while (keepAlive)
             {
                 Console.Write("Введите название товара: ");
@@ -33,10 +42,19 @@ while (appRunning)
                 keepAlive = app.GetAllProductInfo(productName);
             }
             break;
-        case "2":
-            Console.WriteLine("Здесь будет золотой клиент");
+        case ConsoleKey.D2:
+        // case "2":
+            while (keepAlive)
+            {
+                Console.Write("Введите год: ");
+                int.TryParse(Console.ReadLine(), out int year);
+                Console.Write("Введите месяц: ");
+                int.TryParse(Console.ReadLine(), out int month);
+                keepAlive = app.GetGoldenClient(year, month);
+            }
             break;
-        case "3":
+        case ConsoleKey.D3:
+        // case "3":
             while (keepAlive)
             {
                 Console.Write("Введите название орагнизации: ");
@@ -46,16 +64,16 @@ while (appRunning)
                 keepAlive = app.ChangeOrgContactName(organization, newName);
             }
             break;
-        case "q":
+        case ConsoleKey.Q:
+        // case "q":
             Console.WriteLine("Выход...");
             appRunning = false;
+            break;
+        default:
             break;
     }
     if (!appRunning) break;
 }
-
-// app.PrintAllProducts();
-// start.PrintProductId("Йогурт");
 
 public class App
 {
@@ -64,13 +82,18 @@ public class App
     private RequestService requestService;
     private ExcelProcess excelProcess;
     public bool repeatInit = true;
-    public void Init(string path)
+
+    public void InitExcel(string path)
     {
         excelProcess = new ExcelProcess(path);
+        repeatInit = excelProcess.repeatInit;
+    }
+
+    public void InitSheets()
+    {
         productService = new ProductService(excelProcess);
         clientService = new ClientService(excelProcess);
         requestService = new RequestService(excelProcess);
-        repeatInit = excelProcess.repeatInit;
     }
 
     public bool GetAllProductInfo(string productName)
@@ -114,25 +137,8 @@ public class App
         {
             Console.WriteLine(rEx.Message);
         }
-        finally
-        {
-            if (startOver)
-            {
-                waitKey = false;
-                Console.WriteLine("Попробовать еще раз? (y/n)\n");
-                var answer = Console.ReadLine();
-                startOver = answer == "y";
-            }
-        }
 
-        if (waitKey)
-        {
-            waitKey = false;
-            Console.WriteLine("Для продолжения нажмите любую кнопку...");
-            Console.ReadLine();
-        }
-
-        return startOver;
+        return Navigation(startOver, waitKey);
     }
 
     public bool ChangeOrgContactName(string organization, string newFullName)
@@ -163,92 +169,61 @@ public class App
         {
             Console.WriteLine(aEx.Message);
         }
-        finally
-        {
-            if (startOver)
-            {
-                Console.WriteLine("Попробовать еще раз? (y/n)\n");
-                var answer = Console.ReadLine();
-                startOver = answer == "y";
-            }
-        }
 
-        if (waitKey)
-        {
-            waitKey = false;
-            Console.WriteLine("Для продолжения нажмите любую кнопку...");
-            Console.ReadLine();
-        }
-        return startOver;
+        return Navigation(startOver, waitKey);
     }
 
-    public bool GetGoldenClient (int year, int month)
+    public bool GetGoldenClient(int year, int month)
     {
         bool startOver = true;
         bool waitKey = true;
 
         try
         {
-            Dictionary<int, int> clientCount = new();
+            Dictionary<int, int> dc = new Dictionary<int, int>();
+            if (year == 0) throw new ArgumentException("Год введен неверно!");
+            else if (month == 0) throw new ArgumentException("Месяц введен неверно!");
             var clients = clientService.ClientsList;
             var requests = requestService.RequestsList;
 
             var filterRequests = requests.Where(x => x.Date.Year == year && x.Date.Month == month);
             var filterClients = filterRequests.Select(x => x.ClientId).Distinct();
 
-            int targetId = 0;
             int max = 0;
 
             foreach (int clientId in filterClients)
             {
                 int reqCount = filterRequests.Count(x => x.ClientId == clientId);
-                if (reqCount > max)
-                {
-                    max = reqCount;
-                    targetId = clientId;
-                }                 
+                if (reqCount > max) max = reqCount;
+                dc[clientId] = reqCount;
             }
 
-            var targetClient = clientService.GetClientById(targetId);
+            var goldenClients = dc.Where(x => x.Value == max).Select(x => x.Key).ToList();
 
-            Console.WriteLine($"Золотой клиент: {targetClient.Organization}");
+            if (goldenClients.Count == 1)
+            {
+                string goldenClient = clientService.GetClientById(goldenClients.First()).Organization;
+                Console.WriteLine($"\nЗолотой клиент: {goldenClient}");
+            }
+            else
+            {
+                Console.WriteLine($"\nКлиентов с наибольшим количеством заказов найдено: {goldenClients.Count}");
+                foreach (var targetId in goldenClients)
+                {
+                    var targetClients = clientService.GetClientById(targetId);
+                    Console.WriteLine(targetClients.Organization);
+                }
+            }
 
             startOver = false;
         }
-        catch (ProductException pEx)
+        catch (ArgumentException aEx)
         {
-            Console.WriteLine(pEx.Message);
-        }
-        catch (ClientException cEx)
-        {
-            Console.Write(cEx.Message);
-            Console.WriteLine($" ID клиента: {cEx.Value}");
-        }
-        catch (RequestException rEx)
-        {
-            Console.WriteLine(rEx.Message);
-        }
-        finally
-        {
-            if (startOver)
-            {
-                waitKey = false;
-                Console.WriteLine("Попробовать еще раз? (y/n)\n");
-                var answer = Console.ReadLine();
-                startOver = answer == "y";
-            }
+            Console.WriteLine(aEx.Message);
         }
 
-        if (waitKey)
-        {
-            waitKey = false;
-            Console.WriteLine("Для продолжения нажмите любую кнопку...");
-            Console.ReadLine();
-        }
-
-        return startOver;
+        return Navigation(startOver, waitKey);
     }
-
     private void PrintAllProductInfo(string organization, int amount, double price, string date)
     {
         Console.WriteLine($"- Организация: {organization}");
@@ -259,9 +234,29 @@ public class App
 
     public void PrintMenu()
     {
-        Console.WriteLine("1. Получить информацию о клиентах по названию товара.");
-        Console.WriteLine("2. Определить \"Золотого\" клиента.");
-        Console.WriteLine("3. Изменить ФИО контактного лица организации.\n");
+        Console.WriteLine("1 => Получить информацию о клиентах по названию товара.");
+        Console.WriteLine("2 => Определить \"Золотого\" клиента.");
+        Console.WriteLine("3 => Изменить ФИО контактного лица организации.\n");
         Console.WriteLine("Нажмите q, чтобы выйти...\n");
+    }
+
+    private bool Navigation(bool startOver, bool wait)
+    {
+        if (startOver)
+        {
+            wait = false;
+            Console.WriteLine("Попробовать еще раз? (y/n)\n");
+            var answer = Console.ReadKey().Key;
+            startOver = answer == ConsoleKey.Y;
+            Console.Clear();
+        }
+
+        if (wait)
+        {
+            Console.WriteLine("Для продолжения нажмите любую кнопку...");
+            Console.ReadKey();
+        }
+
+        return startOver;
     }
 }
